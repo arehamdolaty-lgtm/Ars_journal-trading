@@ -1,0 +1,242 @@
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#061426">
+<title>ARS Trading | Trading Journal</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#061426;--blue:#39bfff;--glass:rgba(94,184,255,.08);--border:rgba(137,205,255,.17);--text:#edf7ff;--muted:#8da8c4}
+body{font-family:Arial,Tahoma,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body:before,body:after{content:"";position:fixed;width:300px;height:300px;border-radius:50%;filter:blur(100px);opacity:.2;pointer-events:none;z-index:-1;animation:float 12s ease-in-out infinite alternate}
+body:before{background:#008cff;top:5%;right:-100px}
+body:after{background:#154cff;bottom:0;left:-100px;animation-delay:-5s}
+@keyframes float{to{transform:translate(40px,80px) scale(1.2)}}
+header{position:sticky;top:0;z-index:10;background:rgba(6,20,38,.78);backdrop-filter:blur(20px);border-bottom:1px solid var(--border);padding:16px 5%;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.logo{font-size:27px;font-weight:900;letter-spacing:3px;color:#73d3ff;text-shadow:0 0 22px #168fff}
+.logo small{display:block;font-size:9px;letter-spacing:4px;color:var(--muted);margin-top:3px}
+.badge{border:1px solid var(--border);padding:9px 13px;border-radius:20px;color:#8cddff;font-size:12px}
+.container{width:min(1200px,92%);margin:30px auto 60px}
+.hero{padding:30px 0 26px}
+.eyebrow{color:var(--blue);font-size:12px;letter-spacing:2px;margin-bottom:14px}
+h1{font-size:clamp(28px,5vw,46px);line-height:1.4;margin-bottom:12px}
+h1 span{color:#64caff}
+.subtitle{color:var(--muted);font-size:14px;line-height:2}
+.glass{background:linear-gradient(135deg,rgba(101,183,255,.12),rgba(40,108,184,.035));border:1px solid var(--border);border-radius:20px;backdrop-filter:blur(18px);box-shadow:0 12px 45px #00000016;transition:transform .3s,border-color .3s}
+.glass:hover{border-color:rgba(83,190,255,.4)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;margin:22px 0}
+.stat{padding:20px;min-width:0}
+.label{color:var(--muted);font-size:12px;margin-bottom:15px}
+.value{font-size:clamp(18px,3vw,27px);font-weight:800;direction:ltr;text-align:right;overflow-wrap:anywhere}
+.positive{color:#43e3b0}.negative{color:#ff7797}
+.small{font-size:11px;color:var(--muted);margin-top:10px}
+.section-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:34px 0 16px}
+.section-title h2{font-size:18px}
+.section-title span{font-size:11px;color:var(--muted)}
+.grid{display:grid;grid-template-columns:1.6fr 1fr;gap:16px}
+.panel{padding:22px;min-width:0}
+.panel h3{font-size:15px;margin-bottom:20px}
+.chart-wrap{position:relative;height:260px;width:100%}
+.pills{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.pill,button{border:1px solid var(--border);background:rgba(68,151,218,.1);color:#ccecff;padding:9px 13px;border-radius:11px;font-size:12px;cursor:pointer;transition:.2s}
+.pill.active,button:hover{background:rgba(48,167,255,.22);border-color:#43bfff}
+.donut-layout{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.donut{width:130px;height:130px;flex-shrink:0;position:relative}
+.donut canvas{width:100%!important;height:100%!important}
+.legend{display:grid;gap:13px;font-size:12px;color:var(--muted)}
+.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-left:7px}
+.list{display:grid;gap:12px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px;border-radius:13px;background:rgba(84,162,230,.06);border:1px solid rgba(137,205,255,.09)}
+.row strong{font-size:13px}
+.row p{font-size:11px;color:var(--muted);margin-top:7px}
+.tag{font-size:10px;border-radius:7px;padding:6px 8px;white-space:nowrap;background:#173c50;color:#8ce9cf}
+.tag.warn{background:#482d3a;color:#ffb2c5}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:550px;font-size:12px}
+th,td{padding:15px 12px;text-align:right;border-bottom:1px solid var(--border);white-space:nowrap}
+th{color:var(--muted);font-weight:400}
+td{color:#d9eafa}
+footer{text-align:center;color:#718ca7;font-size:11px;padding:30px 10px;border-top:1px solid var(--border);line-height:2.2}
+footer b{color:#66caff;letter-spacing:2px}
+@media(max-width:760px){.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.grid{grid-template-columns:1fr}.container{margin-top:15px}.panel{padding:17px}.hero{padding-top:24px}.chart-wrap{height:230px}.donut-layout{justify-content:center}.legend{min-width:125px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important}}
+</style>
+</head>
+
+<body>
+<header>
+  <div class="logo">ARS<small>TRADING JOURNAL</small></div>
+  <div class="badge">● TRADER DASHBOARD</div>
+</header>
+
+<main class="container">
+  <section class="hero">
+    <div class="eyebrow">YOUR EDGE. YOUR DATA.</div>
+    <h1>معاملاتت رو بشناس،<br><span>هوشمندانه‌تر معامله کن.</span></h1>
+    <p class="subtitle">تحلیل عملکرد، شناسایی اشتباهات و ساخت گزارش حرفه‌ای معاملات در یک محیط اختصاصی.</p>
+  </section>
+
+  <div class="glass" style="padding:12px 16px;color:#9fc9e9;font-size:11px;line-height:2">
+    ⚠️ نسخه نمایشی ARS — اعداد و معاملات این صفحه نمونه هستند و اطلاعات واقعی حساب شما نیستند.
+  </div>
+
+  <section class="stats">
+    <div class="glass stat"><div class="label">سود / ضرر خالص</div><div class="value positive">+$1,248.50</div><div class="small">داده نمایشی</div></div>
+    <div class="glass stat"><div class="label">نرخ معاملات موفق</div><div class="value">68.4%</div><div class="small">بر اساس نمونه فرضی</div></div>
+    <div class="glass stat"><div class="label">کل معاملات</div><div class="value">73</div><div class="small">معاملات نمونه</div></div>
+    <div class="glass stat"><div class="label">افت سرمایه</div><div class="value negative">-4.2%</div><div class="small">بیشترین افت نمونه</div></div>
+  </section>
+
+  <div class="section-title"><h2>📊 تحلیل عملکرد</h2><span>PERFORMANCE</span></div>
+  <section class="grid">
+    <div class="glass panel">
+      <h3>روند سود و زیان</h3>
+      <div class="pills">
+        <button class="pill active" data-period="week">هفتگی</button>
+        <button class="pill" data-period="month">ماهانه</button>
+        <button class="pill" data-period="year">سالانه</button>
+      </div>
+      <div class="chart-wrap"><canvas id="profitChart"></canvas></div>
+    </div>
+    <div class="glass panel">
+      <h3>نتایج معاملات</h3>
+      <div class="donut-layout">
+        <div class="donut"><canvas id="resultChart"></canvas></div>
+        <div class="legend">
+          <div><i class="dot" style="background:#43e3b0"></i>سودده: 50</div>
+          <div><i class="dot" style="background:#ff7797"></i>ضررده: 23</div>
+          <div><i class="dot" style="background:#579dff"></i>کل: 73</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-title"><h2>🎯 تحلیل استراتژی‌ها</h2><span>STRATEGY INSIGHTS</span></div>
+  <section class="grid">
+    <div class="glass panel">
+      <h3>عملکرد ستاپ‌ها</h3>
+      <div class="chart-wrap"><canvas id="strategyChart"></canvas></div>
+    </div>
+    <div class="glass panel">
+      <h3>🧠 اشتباهات پرتکرار</h3>
+      <div class="list">
+        <div class="row"><div><strong>ورود بدون تأییدیه</strong><p>نیازمند بررسی معاملات ثبت‌شده</p></div><span class="tag warn">نمونه</span></div>
+        <div class="row"><div><strong>ریسک بیشتر از برنامه</strong><p>بررسی حجم و حد ضرر</p></div><span class="tag warn">نمونه</span></div>
+        <div class="row"><div><strong>خروج زودهنگام</strong><p>مقایسه خروج واقعی با برنامه</p></div><span class="tag">نمونه</span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="section-title"><h2>📔 آخرین معاملات</h2><span>TRADE HISTORY</span></div>
+  <section class="glass panel">
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>نماد</th><th>تاریخ</th><th>ساعت</th><th>استراتژی</th><th>نتیجه</th><th>سود / ضرر</th></tr></thead>
+        <tbody>
+          <tr><td>XAUUSD</td><td>۱۴۰۵/۰۷/۲۸</td><td>10:35</td><td>SRF</td><td><span class="tag">سودده</span></td><td class="positive">+$85</td></tr>
+          <tr><td>XAUUSD</td><td>۱۴۰۵/۰۷/۲۷</td><td>14:10</td><td>Breakout</td><td><span class="tag warn">ضررده</span></td><td class="negative">-$30</td></tr>
+          <tr><td>GBPUSD</td><td>۱۴۰۵/۰۷/۲۶</td><td>09:20</td><td>Pullback</td><td><span class="tag">سودده</span></td><td class="positive">+$62</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <div class="section-title"><h2>📄 گزارش معاملاتی</h2><span>TRADING REPORT</span></div>
+  <section class="glass panel">
+    <h3>گزارش حرفه‌ای خودت رو آماده کن</h3>
+    <p class="subtitle" style="margin-bottom:18px">در نسخه بعدی، تاریخ شروع و پایان رو انتخاب می‌کنی و گزارش اختصاصی شامل نمودار، معاملات و آمار عملکرد رو به PDF تبدیل می‌کنی.</p>
+    <div class="pills">
+      <button id="reportBtn">آماده‌سازی گزارش PDF</button>
+      <button id="shareBtn">اشتراک‌گذاری گزارش</button>
+    </div>
+    <p id="reportMessage" class="small" aria-live="polite">این قابلیت در نسخه بعدی به اطلاعات واقعی متصل می‌شود.</p>
+  </section>
+</main>
+
+<footer><b>ARS TRADING</b><br>TRADE WITH DATA. GROW WITH DISCIPLINE.<br>نسخه نمایشی اولیه — اطلاعات این صفحه واقعی نیستند.</footer>
+
+<script>
+const chartFont={family:"Arial",size:11};
+const commonOptions={
+  responsive:true,maintainAspectRatio:false,
+  plugins:{legend:{display:false},tooltip:{rtl:true,titleFont:chartFont,bodyFont:chartFont}},
+  scales:{
+    x:{grid:{color:"rgba(140,190,230,.07)"},ticks:{color:"#8da8c4",font:chartFont}},
+    y:{grid:{color:"rgba(140,190,230,.09)"},ticks:{color:"#8da8c4",font:chartFont}}
+  }
+};
+
+const periodData={
+  week:{labels:["شنبه","یکشنبه","دوشنبه","سه‌شنبه","چهارشنبه","پنجشنبه","جمعه"],data:[80,35,125,60,170,130,205]},
+  month:{labels:["هفته ۱","هفته ۲","هفته ۳","هفته ۴"],data:[180,320,250,498]},
+  year:{labels:["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور"],data:[300,480,410,650,820,1248]}
+};
+
+const profitChart=new Chart(document.getElementById("profitChart"),{
+  type:"line",
+  data:{labels:periodData.week.labels,datasets:[{
+    data:periodData.week.data,borderColor:"#49c4ff",
+    backgroundColor:"rgba(54,166,255,.12)",fill:true,
+    tension:.38,pointRadius:3,pointBackgroundColor:"#9ae4ff",borderWidth:2
+  }]},
+  options:commonOptions
+});
+
+new Chart(document.getElementById("resultChart"),{
+  type:"doughnut",
+  data:{labels:["سودده","ضررده"],datasets:[{
+    data:[50,23],backgroundColor:["#43e3b0","#ff7797"],
+    borderColor:"#0a1d32",borderWidth:4,hoverOffset:5
+  }]},
+  options:{responsive:true,maintainAspectRatio:false,cutout:"72%",
+    plugins:{legend:{display:false},tooltip:{rtl:true}}}
+});
+
+new Chart(document.getElementById("strategyChart"),{
+  type:"bar",
+  data:{labels:["SRF","Breakout","Pullback","Order Block"],datasets:[{
+    data:[76,54,68,61],backgroundColor:["#49c4ff","#408eea","#5cafff","#3974bf"],
+    borderRadius:6,maxBarThickness:35
+  }]},
+  options:{...commonOptions,scales:{...commonOptions.scales,y:{...commonOptions.scales.y,min:0,max:100,ticks:{color:"#8da8c4",callback:v=>v+"%"}}}}
+});
+
+document.querySelectorAll("[data-period]").forEach(btn=>{
+  btn.addEventListener("click",()=>{
+    document.querySelectorAll("[data-period]").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    const selected=periodData[btn.dataset.period];
+    profitChart.data.labels=selected.labels;
+    profitChart.data.datasets[0].data=selected.data;
+    profitChart.update();
+  });
+});
+
+document.getElementById("reportBtn").addEventListener("click",()=>{
+  document.getElementById("reportMessage").textContent=
+  "گزارش PDF هنوز به معاملات واقعی متصل نیست؛ در مرحله بعد قابلیت تولید PDF را اضافه می‌کنیم.";
+});
+
+document.getElementById("shareBtn").addEventListener("click",async()=>{
+  const message="ARS Trading — نسخه نمایشی داشبورد";
+  if(navigator.share){
+    try{await navigator.share({title:"ARS Trading",text:message,url:location.href})}
+    catch(e){}
+  }else if(navigator.clipboard){
+    try{
+      await navigator.clipboard.writeText(location.href);
+      document.getElementById("reportMessage").textContent="آدرس سایت کپی شد؛ این لینک فعلاً داشبورد نمایشی را باز می‌کند.";
+    }catch(e){
+      document.getElementById("reportMessage").textContent="آدرس سایت: "+location.href;
+    }
+  }else{
+    document.getElementById("reportMessage").textContent="آدرس سایت: "+location.href;
+  }
+});
+</script>
+</body>
+</html>
